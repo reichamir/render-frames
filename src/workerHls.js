@@ -1,12 +1,10 @@
 import { Canvas2DRenderer } from "./canvas2DRenderer.js";
-import muxjs from "mux.js";
-import { MP4Demuxer } from "./transmuxTsToMp4";
+import { TransmuxHlsToMp4 } from "./transmuxHlsToMp4";
+import { MP4Demuxer } from './mp4Demuxer.js';
 
 let decoder = null;
 let renderer = null;
 let pendingFrame = null;
-const tsMuxer = new muxjs.mp4.Transmuxer();
-let demuxer = null;
 
 function renderFrame(frame) {
   if (!pendingFrame) {
@@ -42,61 +40,22 @@ function initDecoder(decoderConfig) {
       decoder.configure(decoderConfig);
 }
 
-demuxer = new MP4Demuxer({
-  onConfig: (e) => {
-    initDecoder(e);
-  },
-  onChunk: (e) => {
-    const chunk = new EncodedVideoChunk({
-        type: e.type,
-        timestamp: e.timestamp,
-        duration: e.duration,
-        data: e.data,
-    });
-
-    decoder.decode(chunk);
-  },
-  setStatus: (e) => console.log("setStatus", e),
-})
-
-function handleInitTs(tsMpegUrl) {
-  return new Promise(async(resolve) => {
-    tsMuxer.on("data", (segment) => {
-      let data = new Uint8Array(
-        segment.initSegment.byteLength + segment.data.byteLength
-      );
-      data.set(segment.initSegment, 0);
-      data.set(segment.data, segment.initSegment.byteLength);
-  
-      demuxer.writeChunk(data);
-    });
-  
-    const response = await fetch(tsMpegUrl)
-    const buffer = await response.arrayBuffer();
-    tsMuxer.push(new Uint8Array(buffer));
-    tsMuxer.flush();
-    resolve();
-  })
-}
-
-function handleNextTs(tsMpegUrls) {
-  tsMuxer.off("data");
-  tsMuxer.on("data", (segment) => {
-    const data = new Uint8Array(segment.data);
-    demuxer.writeChunk(data);
+function start(tsUrls) {
+  const mp4Demuxer = new MP4Demuxer({
+    onConfig: (data) => {
+      initDecoder(data);
+    },
+    onChunk: (encodedVideoChunk) => {
+      decoder.decode(encodedVideoChunk);
+    },
   });
 
-  tsMpegUrls.forEach(async tsMpegUrl => {
-    const response = await fetch(tsMpegUrl)
-    const buffer = await response.arrayBuffer();
-    tsMuxer.push(new Uint8Array(buffer));
-    tsMuxer.flush();
-  })
-}
-
-async function handleTsMpegList(tsMpegUrls) {
-  await handleInitTs(tsMpegUrls[0]);
-  handleNextTs(tsMpegUrls.slice(1));
+  new TransmuxHlsToMp4({
+    tsUrls, 
+    onChunk: (chunk) => {
+      mp4Demuxer.write(chunk);
+    }
+  });
 }
 
 self.addEventListener("message", e => {
@@ -104,7 +63,7 @@ self.addEventListener("message", e => {
 
     if (type === "initCanvas") {
       initCanvas(data.canvas);
-    } else if (type === "handleTsMpegList") {
-      handleTsMpegList(data.tsMpegUrls);
+    } else if (type === "start") {
+      start(data.tsUrls);
     } 
 });

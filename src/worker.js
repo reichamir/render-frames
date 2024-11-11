@@ -1,13 +1,9 @@
 import { Canvas2DRenderer } from "./canvas2DRenderer.js";
-import { MP4Demuxer } from "./demuxerMp4.js";
+import { MP4Demuxer } from "./mp4Demuxer.js";
 
 let renderer = null;
   // Rendering. Drawing is limited to once per animation frame.
   let pendingFrame = null;
-
-function setStatus(type, message) {
-    console.log('setStatus',type, message);
-  }
 
 
 function renderFrame(frame) {
@@ -23,12 +19,11 @@ function renderFrame(frame) {
 }
 
 function renderAnimationFrame() {
-    console.log('renderAnimationFrame',pendingFrame);
   renderer.draw(pendingFrame);
   pendingFrame = null;
 }
 
-function start({dataUri, canvas}) {
+function start({url, canvas}) {
     renderer = new Canvas2DRenderer(canvas);
 
     const decoder = new VideoDecoder({
@@ -40,7 +35,7 @@ function start({dataUri, canvas}) {
         }
       });
 
-      new MP4Demuxer(dataUri, {
+      const demuxer = new MP4Demuxer({
         onConfig(config) {
           console.log('config', config);
           decoder.configure(config);
@@ -48,12 +43,11 @@ function start({dataUri, canvas}) {
         onChunk(chunk) {
           decoder.decode(chunk);
         },
-        setStatus
       });
+
+      demuxer.fetchData(url)
 }
 
 self.addEventListener("message", e => {
     start(e.data);
 }, {once: true});
-
-self.postMessage("Hello from worker");

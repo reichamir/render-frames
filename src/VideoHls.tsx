@@ -87,11 +87,11 @@ export function VideoHls() {
     });
 
     hlsRef.current.on(Hls.Events.LEVEL_LOADED, (event, data) => {
-      const tsMpegUrls = data.details.fragments.map((frag) => frag.url);
+      const tsUrls = data.details.fragments.map((frag) => frag.url);
 
       workerRef.current.postMessage({
-        type: "handleTsMpegList",
-        tsMpegUrls,
+        type: "start",
+        tsUrls,
       });
 
       // segments.current = fragments.map((frag) => frag.url);
