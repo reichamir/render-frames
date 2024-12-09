@@ -1,4 +1,4 @@
-var Module = typeof Module != "undefined" ? Module : {};
+var Module = typeof self.Module != "undefined" ? self.Module : {};
 var moduleOverrides = Object.assign({}, Module);
 var arguments_ = [];
 var thisProgram = "./this.program";
@@ -247,10 +247,10 @@ var dataURIPrefix = "data:application/octet-stream;base64,";
 var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
 var isFileURI = (filename) => filename.startsWith("file://");
 var wasmBinaryFile;
-wasmBinaryFile = "Uncensored3D.wasm";
-if (!isDataURI(wasmBinaryFile)) {
-  wasmBinaryFile = locateFile(wasmBinaryFile);
-}
+wasmBinaryFile = "http://localhost:5175/wasm/Uncensored3D.wasm";
+// if (!isDataURI(wasmBinaryFile)) {
+//   wasmBinaryFile = locateFile(wasmBinaryFile);
+// }
 function getBinarySync(file) {
   if (file == wasmBinaryFile && wasmBinary) {
     return new Uint8Array(wasmBinary);
@@ -3699,11 +3699,11 @@ var Browser = {
     };
     preloadPlugins.push(audioPlugin);
     function pointerLockChange() {
-      Browser.pointerLock =
-        document["pointerLockElement"] === Module["canvas"] ||
-        document["mozPointerLockElement"] === Module["canvas"] ||
-        document["webkitPointerLockElement"] === Module["canvas"] ||
-        document["msPointerLockElement"] === Module["canvas"];
+      // Browser.pointerLock =
+      //   document["pointerLockElement"] === Module["canvas"] ||
+      //   document["mozPointerLockElement"] === Module["canvas"] ||
+      //   document["webkitPointerLockElement"] === Module["canvas"] ||
+      //   document["msPointerLockElement"] === Module["canvas"];
     }
     var canvas = Module["canvas"];
     if (canvas) {
@@ -3713,29 +3713,29 @@ var Browser = {
         canvas["webkitRequestPointerLock"] ||
         canvas["msRequestPointerLock"] ||
         (() => {});
-      canvas.exitPointerLock =
-        document["exitPointerLock"] ||
-        document["mozExitPointerLock"] ||
-        document["webkitExitPointerLock"] ||
-        document["msExitPointerLock"] ||
-        (() => {});
-      canvas.exitPointerLock = canvas.exitPointerLock.bind(document);
-      document.addEventListener("pointerlockchange", pointerLockChange, false);
-      document.addEventListener(
-        "mozpointerlockchange",
-        pointerLockChange,
-        false
-      );
-      document.addEventListener(
-        "webkitpointerlockchange",
-        pointerLockChange,
-        false
-      );
-      document.addEventListener(
-        "mspointerlockchange",
-        pointerLockChange,
-        false
-      );
+      // canvas.exitPointerLock =
+      //   document["exitPointerLock"] ||
+      //   document["mozExitPointerLock"] ||
+      //   document["webkitExitPointerLock"] ||
+      //   document["msExitPointerLock"] ||
+      //   (() => {});
+      // canvas.exitPointerLock = canvas.exitPointerLock.bind(document);
+      // document.addEventListener("pointerlockchange", pointerLockChange, false);
+      // document.addEventListener(
+      //   "mozpointerlockchange",
+      //   pointerLockChange,
+      //   false
+      // );
+      // document.addEventListener(
+      //   "webkitpointerlockchange",
+      //   pointerLockChange,
+      //   false
+      // );
+      // document.addEventListener(
+      //   "mspointerlockchange",
+      //   pointerLockChange,
+      //   false
+      // );
       if (Module["elementPointerLock"]) {
         canvas.addEventListener(
           "click",
@@ -3804,11 +3804,12 @@ var Browser = {
       Browser.isFullscreen = false;
       var canvasContainer = canvas.parentNode;
       if (
-        (document["fullscreenElement"] ||
-          document["mozFullScreenElement"] ||
-          document["msFullscreenElement"] ||
-          document["webkitFullscreenElement"] ||
-          document["webkitCurrentFullScreenElement"]) === canvasContainer
+        // (document["fullscreenElement"] ||
+        //   document["mozFullScreenElement"] ||
+        //   document["msFullscreenElement"] ||
+        //   document["webkitFullscreenElement"] ||
+        //   document["webkitCurrentFullScreenElement"]) === canvasContainer
+        1 !== 0
       ) {
         canvas.exitFullscreen = Browser.exitFullscreen;
         if (Browser.lockPointer) canvas.requestPointerLock();
@@ -3866,14 +3867,14 @@ var Browser = {
     if (!Browser.isFullscreen) {
       return false;
     }
-    var CFS =
-      document["exitFullscreen"] ||
-      document["cancelFullScreen"] ||
-      document["mozCancelFullScreen"] ||
-      document["msExitFullscreen"] ||
-      document["webkitCancelFullScreen"] ||
-      (() => {});
-    CFS.apply(document, []);
+    // var CFS =
+    //   document["exitFullscreen"] ||
+    //   document["cancelFullScreen"] ||
+    //   document["mozCancelFullScreen"] ||
+    //   document["msExitFullscreen"] ||
+    //   document["webkitCancelFullScreen"] ||
+    //   (() => {});
+    // CFS.apply(document, []);
     return true;
   },
   nextRAF: 0,
@@ -3919,11 +3920,11 @@ var Browser = {
     }[name.substr(name.lastIndexOf(".") + 1)];
   },
   getUserMedia(func) {
-    if (!window.getUserMedia) {
-      window.getUserMedia =
-        navigator["getUserMedia"] || navigator["mozGetUserMedia"];
-    }
-    window.getUserMedia(func);
+    // if (!window.getUserMedia) {
+    //   window.getUserMedia =
+    //     navigator["getUserMedia"] || navigator["mozGetUserMedia"];
+    // }
+    // window.getUserMedia(func);
   },
   getMovementX(event) {
     return (
@@ -3996,14 +3997,14 @@ var Browser = {
       var rect = Module["canvas"].getBoundingClientRect();
       var cw = Module["canvas"].width;
       var ch = Module["canvas"].height;
-      var scrollX =
-        typeof window.scrollX != "undefined"
-          ? window.scrollX
-          : window.pageXOffset;
-      var scrollY =
-        typeof window.scrollY != "undefined"
-          ? window.scrollY
-          : window.pageYOffset;
+      var scrollX = 0;
+      // typeof window.scrollX != "undefined"
+      //   ? window.scrollX
+      //   : window.pageXOffset;
+      var scrollY = 0;
+      // typeof window.scrollY != "undefined"
+      //   ? window.scrollY
+      //   : window.pageYOffset;
       if (
         event.type === "touchstart" ||
         event.type === "touchend" ||
@@ -4088,18 +4089,18 @@ var Browser = {
         h = Math.round(w / Module["forcedAspectRatio"]);
       }
     }
-    if (
-      (document["fullscreenElement"] ||
-        document["mozFullScreenElement"] ||
-        document["msFullscreenElement"] ||
-        document["webkitFullscreenElement"] ||
-        document["webkitCurrentFullScreenElement"]) === canvas.parentNode &&
-      typeof screen != "undefined"
-    ) {
-      var factor = Math.min(screen.width / w, screen.height / h);
-      w = Math.round(w * factor);
-      h = Math.round(h * factor);
-    }
+    // if (
+    //   (document["fullscreenElement"] ||
+    //     document["mozFullScreenElement"] ||
+    //     document["msFullscreenElement"] ||
+    //     document["webkitFullscreenElement"] ||
+    //     document["webkitCurrentFullScreenElement"]) === canvas.parentNode &&
+    //   typeof screen != "undefined"
+    // ) {
+    //   var factor = Math.min(screen.width / w, screen.height / h);
+    //   w = Math.round(w * factor);
+    //   h = Math.round(h * factor);
+    // }
     if (Browser.resizeCanvas) {
       if (canvas.width != w) canvas.width = w;
       if (canvas.height != h) canvas.height = h;
@@ -4672,6 +4673,7 @@ var GL = {
     });
   },
 };
+Module.GL = GL;
 function _glActiveTexture(x0) {
   GLctx.activeTexture(x0);
 }
@@ -5693,10 +5695,11 @@ var GLFW = {
     if (!GLFW.active) return;
     var resizeNeeded = true;
     if (
-      document["fullscreen"] ||
-      document["fullScreen"] ||
-      document["mozFullScreen"] ||
-      document["webkitIsFullScreen"]
+      // document["fullscreen"] ||
+      // document["fullScreen"] ||
+      // document["mozFullScreen"] ||
+      // document["webkitIsFullScreen"]
+      1 !== 0
     ) {
       GLFW.active.storedX = GLFW.active.x;
       GLFW.active.storedY = GLFW.active.y;
@@ -6204,22 +6207,22 @@ var _glfwInit = () => {
   GLFW.windows = new Array();
   GLFW.active = null;
   GLFW.scale = _emscripten_get_device_pixel_ratio();
-  window.addEventListener("gamepadconnected", GLFW.onGamepadConnected, true);
-  window.addEventListener(
-    "gamepaddisconnected",
-    GLFW.onGamepadDisconnected,
-    true
-  );
-  window.addEventListener("keydown", GLFW.onKeydown, true);
-  window.addEventListener("keypress", GLFW.onKeyPress, true);
-  window.addEventListener("keyup", GLFW.onKeyup, true);
-  window.addEventListener("blur", GLFW.onBlur, true);
-  (function updatePixelRatio() {
-    window
-      .matchMedia("(resolution: " + window.devicePixelRatio + "dppx)")
-      .addEventListener("change", updatePixelRatio, { once: true });
-    GLFW.onWindowContentScaleChanged(_emscripten_get_device_pixel_ratio());
-  })();
+  // window.addEventListener("gamepadconnected", GLFW.onGamepadConnected, true);
+  // window.addEventListener(
+  //   "gamepaddisconnected",
+  //   GLFW.onGamepadDisconnected,
+  //   true
+  // );
+  // window.addEventListener("keydown", GLFW.onKeydown, true);
+  // window.addEventListener("keypress", GLFW.onKeyPress, true);
+  // window.addEventListener("keyup", GLFW.onKeyup, true);
+  // window.addEventListener("blur", GLFW.onBlur, true);
+  // (function updatePixelRatio() {
+  //   window
+  //     .matchMedia("(resolution: " + window.devicePixelRatio + "dppx)")
+  //     .addEventListener("change", updatePixelRatio, { once: true });
+  //   GLFW.onWindowContentScaleChanged(_emscripten_get_device_pixel_ratio());
+  // })();
   Module["canvas"].addEventListener("touchmove", GLFW.onMousemove, true);
   Module["canvas"].addEventListener("touchstart", GLFW.onMouseButtonDown, true);
   Module["canvas"].addEventListener("touchcancel", GLFW.onMouseButtonUp, true);
