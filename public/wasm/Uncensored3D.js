@@ -247,7 +247,7 @@ var dataURIPrefix = "data:application/octet-stream;base64,";
 var isDataURI = (filename) => filename.startsWith(dataURIPrefix);
 var isFileURI = (filename) => filename.startsWith("file://");
 var wasmBinaryFile;
-wasmBinaryFile = "http://localhost:5175/wasm/Uncensored3D.wasm";
+wasmBinaryFile = "http://localhost:5173/wasm/Uncensored3D.wasm";
 // if (!isDataURI(wasmBinaryFile)) {
 //   wasmBinaryFile = locateFile(wasmBinaryFile);
 // }

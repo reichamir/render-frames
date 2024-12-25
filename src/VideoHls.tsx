@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import WorkerHls from "./workerHls?worker";
 
 export function VideoHls() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const workerRef = useRef(new WorkerHls());
 
@@ -78,7 +80,8 @@ export function VideoHls() {
     );
 
     hlsRef.current.loadSource(
-      "https://prod-eus2.clipro.tv/api/clone-playlist/InternalPlaylist.m3u8?stream=streamid=3091124,audiotrack=2,startindex=2354,endindex=2364,source=0,discoforgap=1,removeduplications=1"
+      "https://prod-eus2.clipro.tv/api/clone-playlist/InternalPlaylist.m3u8?stream=streamid=2315822,startindex=1796,endindex=1879,source=0,discoforgap=1,removeduplications=1"
+      // "https://prod-eus2.clipro.tv/api/clone-playlist/InternalPlaylist.m3u8?stream=streamid=3091124,audiotrack=2,startindex=2354,endindex=2364,source=0,discoforgap=1,removeduplications=1"
     );
     hlsRef.current.attachMedia(videoRef.current!);
 
@@ -91,7 +94,7 @@ export function VideoHls() {
 
       workerRef.current.postMessage({
         type: "start",
-        tsUrls,
+        tsUrls: [tsUrls[0]],
       });
 
       // segments.current = fragments.map((frag) => frag.url);
@@ -102,14 +105,79 @@ export function VideoHls() {
     hlsRef.current.on(Hls.Events.ERROR, (_event, data) => {
       console.log("ERROR", data);
     });
+
+    workerRef.current.onmessage = (event) => {
+      if (event.data.type === "init") {
+        setIsLoaded(true);
+      }
+    };
   }, [hlsRef, canvasRef]);
+
+  function onTogglePlaying() {
+    if (isPlaying) {
+      workerRef.current.postMessage({
+        type: "pause",
+      });
+    } else {
+      workerRef.current.postMessage({
+        type: "play",
+      });
+    }
+
+    setIsPlaying(!isPlaying);
+  }
+
+  function onSeek(timeMiliSec: number) {
+    workerRef.current.postMessage({
+      type: "seek",
+      timeMiliSec: timeMiliSec,
+    });
+  }
+
+  function onSeekToNextFrame() {
+    workerRef.current.postMessage({
+      type: "seekToNextFrame",
+    });
+  }
+
+  function onSeekToPreviousFrame() {
+    workerRef.current.postMessage({
+      type: "seekToPreviousFrame",
+    });
+  }
 
   return (
     <div>
       <canvas ref={canvasRef} width="1280" height="720"></canvas>
       <br></br>
+      <button disabled={!isLoaded} onClick={onTogglePlaying}>
+        {isPlaying ? "Pause" : "Play"}
+      </button>
+      <button disabled={!isLoaded} onClick={onSeekToPreviousFrame}>
+        Seek To Previous Frame
+      </button>
+      <button disabled={!isLoaded} onClick={onSeekToNextFrame}>
+        Seek To Next Frame
+      </button>
+      <button
+        disabled={!isLoaded}
+        onClick={() => {
+          onSeek(2000);
+        }}
+      >
+        Seek to 2 sec
+      </button>
+      <button
+        disabled={!isLoaded}
+        onClick={() => {
+          onSeek(0);
+        }}
+      >
+        Seek to 0 sec
+      </button>
+      <br></br>
       <video
-        autoPlay={true}
+        autoPlay={false}
         ref={videoRef}
         width="1280"
         height="720"
